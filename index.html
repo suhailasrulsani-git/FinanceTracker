@@ -1,0 +1,180 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinanceTracker-Bootstrap</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="input-group">
+      <label class="me-2">Budget</label>
+      <input type="number" name="Budget" id="BudgetEl" />
+    </div>
+    <h3>Remaining: MYR <span id="RemainingEl">0</span></h3>
+    <h3 class="mb-5">Total Price: MYR <span id="TotalPriceEl">0</span></h3>
+
+    <div class="mb-2">
+        <label>Category</label>
+        <select id="CategoryEl">
+          <option value="Food">Food</option>
+          <option value="Grocery">Grocery</option>
+          <option value="Car">Car</option>
+        </select>
+    </div>
+    
+
+    <div class="mb-3">
+        <label>Desc</label>
+        <input id="DescEl" type="text" />
+    
+        <label>Price</label>
+        <input id="PriceEl" type="number" />
+    </div>
+
+
+    <button class="btn btn-primary mb-5" onclick="Submit()">Submit</button>
+
+    <div class="col-3">
+        <table class="table">
+            <thead>
+              <tr>
+                <th class="text-primary">Date</th>
+                <th class="text-primary">Category</th>
+                <th class="text-primary">Desc</th>
+                <th class="text-primary">Price</th>
+              </tr>
+            </thead>
+    
+            <tbody id="TableBodyEl"></tbody>
+          </table>
+    </div>
+    
+
+      <button class="btn btn-danger" onclick="Clear()" type="button">Clear</button>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+        const CategoryEl = document.getElementById("CategoryEl");
+        const DescEl = document.getElementById("DescEl");
+        const PriceEl = document.getElementById("PriceEl");
+        const TableBodyEl = document.getElementById("TableBodyEl");
+        const TotalPriceEl = document.getElementById("TotalPriceEl");
+        const BudgetEl = document.getElementById("BudgetEl");
+        const RemainingEl = document.getElementById("RemainingEl");
+  
+        let Remaining = 0;
+        let ListInput = [];
+        let TotalPrice1 = [];
+  
+        // Load stored data on page load
+        window.onload = function () {
+          if (localStorage.getItem("ListInput")) {
+            ListInput = JSON.parse(localStorage.getItem("ListInput"));
+          }
+  
+          if (localStorage.getItem("TotalPrice1")) {
+            TotalPrice1 = JSON.parse(localStorage.getItem("TotalPrice1"));
+          }
+  
+          if (localStorage.getItem("Remaining")) {
+            Remaining = Number(localStorage.getItem("Remaining"));
+          }
+  
+          if (localStorage.getItem("Budget")) {
+            BudgetEl.value = localStorage.getItem("Budget");
+          }
+  
+          RenderList();
+        };
+  
+        function RenderList() {
+          let TotalPrice = 0;
+          TotalPrice1.forEach((Item) => {
+            TotalPrice += Item;
+          });
+  
+          // Update the total price display
+          TotalPriceEl.textContent = TotalPrice;
+  
+          let ListItems = "";
+          ListInput.forEach((Item, index) => {
+            ListItems += `
+              <tr>
+                <td>${Item[0]}</td>
+                <td>${Item[1]}</td>
+                <td>${Item[2]}</td>
+                <td>${Item[3]}</td>
+              </tr>`;
+          });
+  
+          TableBodyEl.innerHTML = ListItems;
+  
+          const Budget = BudgetEl.value;
+  
+          Remaining = Budget - TotalPrice;
+          RemainingEl.textContent = Remaining;
+  
+          // Save the updated data to local storage
+          localStorage.setItem("ListInput", JSON.stringify(ListInput));
+          localStorage.setItem("TotalPrice1", JSON.stringify(TotalPrice1));
+          localStorage.setItem("Remaining", Remaining);
+          localStorage.setItem("Budget", Budget);
+        }
+  
+        function Submit() {
+          const priceValue = Number(PriceEl.value);
+          const currentDate = new Date().toLocaleDateString(); // Generate the current date
+          const descValue = DescEl.value; // Get the description value
+  
+          if (
+            descValue === "" ||
+            priceValue === "" ||
+            isNaN(priceValue) ||
+            priceValue <= 0
+          ) {
+            alert("Please insert an integer value in the Price field");
+          } else {
+            TotalPrice1.push(priceValue); // Push number, not string
+            ListInput.push([
+              currentDate,
+              CategoryEl.value,
+              descValue,
+              priceValue,
+            ]);
+            RenderList();
+  
+            // Clear the inputs after submission
+            DescEl.value = "";
+            PriceEl.value = "";
+          }
+        }
+  
+        function Clear() {
+          localStorage.clear();
+          ListInput = [];
+          TotalPrice1 = [];
+          Remaining = 0;
+          Budget = 0;
+          BudgetEl.value = ""
+          RenderList();
+        }
+      </script>
+  </body>
+</html>
